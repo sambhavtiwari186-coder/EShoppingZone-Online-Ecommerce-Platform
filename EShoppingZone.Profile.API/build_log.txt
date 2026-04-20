@@ -1,0 +1,11 @@
+  Determining projects to restore...
+Attempting to cancel the build...
+/usr/share/dotnet/sdk/10.0.104/NuGet.targets(196,5): error : Restore canceled! [/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/EShoppingZone.Profile.API.csproj]
+
+Build FAILED.
+
+/usr/share/dotnet/sdk/10.0.104/NuGet.targets(196,5): error : Restore canceled! [/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/EShoppingZone.Profile.API.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:15.79
