@@ -7,6 +7,7 @@ namespace EShoppingZone.Profile.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProfilesController : ControllerBase
     {
         private readonly ProfileService _profileService;
@@ -17,6 +18,7 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpPost("addCustomer")]
+        [AllowAnonymous]
         public async Task<IActionResult> AddCustomer([FromBody] UserProfile profile)
         {
             await _profileService.AddCustomerAsync(profile);
@@ -24,6 +26,7 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpPost("addMerchant")]
+        [AllowAnonymous]
         public async Task<IActionResult> AddMerchant([FromBody] UserProfile profile)
         {
             await _profileService.AddMerchantAsync(profile);
@@ -39,7 +42,6 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpGet("byId/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetProfileById(int id)
         {
             var profile = await _profileService.GetProfileByIdAsync(id);
@@ -48,7 +50,6 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpGet("byPhone/{no}")]
-        [Authorize]
         public async Task<IActionResult> GetProfileByPhone(long no)
         {
             var profile = await _profileService.FindByMobileNumberAsync(no);
@@ -57,7 +58,6 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpGet("byName/{name}")]
-        [Authorize]
         public async Task<IActionResult> GetProfileByName(string name)
         {
             var profile = await _profileService.FindByFullNameAsync(name);
@@ -66,7 +66,6 @@ namespace EShoppingZone.Profile.API.Controllers
         }
 
         [HttpPut("update")]
-        [Authorize]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile profile)
         {
             await _profileService.UpdateProfileAsync(profile);

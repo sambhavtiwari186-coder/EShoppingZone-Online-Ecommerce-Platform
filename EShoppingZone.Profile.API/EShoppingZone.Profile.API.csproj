@@ -16,5 +16,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="EShoppingZone.Profile.Tests\**" />
+    <EmbeddedResource Remove="EShoppingZone.Profile.Tests\**" />
+    <None Remove="EShoppingZone.Profile.Tests\**" />
+  </ItemGroup>
 
 </Project>
