@@ -1,5 +1,6 @@
 using EShoppingZone.Profile.API.Services;
 using EShoppingZone.Profile.API.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ namespace EShoppingZone.Profile.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly ProfileService _profileService;
@@ -28,7 +30,7 @@ namespace EShoppingZone.Profile.API.Controllers
             var user = await _profileService.FindByEmailIdAsync(request.EmailId);
             if (user == null || !_profileService.VerifyPassword(user, request.Password))
             {
-                return Unauthorized();
+                return Unauthorized(new { Message = "Invalid email or password. Please make sure you have registered first using /api/Profiles/addCustomer." });
             }
 
             var token = GenerateJwtToken(user);

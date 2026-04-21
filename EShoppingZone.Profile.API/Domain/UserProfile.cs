@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EShoppingZone.Profile.API.Domain
 {
@@ -14,7 +15,8 @@ namespace EShoppingZone.Profile.API.Domain
         public int Pincode { get; set; }
         public int ProfileId { get; set; }
         
-        public UserProfile Profile { get; set; } = null!;
+        [JsonIgnore]
+        public UserProfile? Profile { get; set; }
     }
 
     public class UserProfile

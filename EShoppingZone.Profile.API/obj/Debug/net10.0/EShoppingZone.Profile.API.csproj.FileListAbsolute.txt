@@ -6,8 +6,11 @@
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.csproj.CoreCompileInputs.cache
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.MvcApplicationPartsAssemblyInfo.cs
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.MvcApplicationPartsAssemblyInfo.cache
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.sourcelink.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/appsettings.Development.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/appsettings.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/EShoppingZone.Profile.Tests.csproj.nuget.dgspec.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/project.assets.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.API.staticwebassets.endpoints.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.API
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.API.deps.json
@@ -156,3 +159,13 @@
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.pdb
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/EShoppingZone.Profile.API.genruntimeconfig.cache
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/obj/Debug/net10.0/ref/EShoppingZone.Profile.API.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/appsettings.Development.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/appsettings.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.API.deps.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.API.runtimeconfig.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.API.staticwebassets.endpoints.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests.deps.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests.runtimeconfig.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/EShoppingZone.Profile.Tests.csproj.nuget.dgspec.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/project.assets.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/Debug/net10.0/EShoppingZone.Profile.Tests.sourcelink.json
