@@ -1,0 +1,32 @@
+@EShoppingZone.Cart.API_HostAddress = http://localhost:5000
+@token = YOUR_JWT_TOKEN_HERE
+
+### Get Cart
+GET {{EShoppingZone.Cart.API_HostAddress}}/api/Cart
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Add Item to Cart
+POST {{EShoppingZone.Cart.API_HostAddress}}/api/Cart/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "productName": "Sample Product",
+    "price": 99.99,
+    "quantity": 2,
+    "imageUrl": "http://example.com/image.jpg"
+}
+
+### Update Quantity
+PUT {{EShoppingZone.Cart.API_HostAddress}}/api/Cart/updateQuantity/1/5
+Authorization: Bearer {{token}}
+
+### Remove Item
+DELETE {{EShoppingZone.Cart.API_HostAddress}}/api/Cart/removeItem/1
+Authorization: Bearer {{token}}
+
+### Clear Cart
+DELETE {{EShoppingZone.Cart.API_HostAddress}}/api/Cart/clear
+Authorization: Bearer {{token}}
