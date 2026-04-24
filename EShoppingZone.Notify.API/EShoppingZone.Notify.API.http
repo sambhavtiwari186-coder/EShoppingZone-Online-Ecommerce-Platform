@@ -1,0 +1,6 @@
+@EShoppingZone.Notify.API_HostAddress = http://localhost:5082
+
+GET {{EShoppingZone.Notify.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
