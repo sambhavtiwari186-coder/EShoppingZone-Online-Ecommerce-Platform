@@ -89,6 +89,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+// Auto-migrate on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<NotificationDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
+
 app.MapHealthChecks("/health");
 
 app.Run();

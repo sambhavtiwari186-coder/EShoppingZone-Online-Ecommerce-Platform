@@ -100,8 +100,17 @@ var app = builder.Build();
 // Auto-migrate on startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
-    db.Database.EnsureCreated();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<WalletDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
 }
 
 // Configure the HTTP request pipeline.
