@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EShoppingZone.Profile.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+207d97cfa7b412296d01659cec95a0cf26a5bb02")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0e0bcd91550586f2a295ef4477b75e7b2a6ef02a")]
 [assembly: System.Reflection.AssemblyProductAttribute("EShoppingZone.Profile.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EShoppingZone.Profile.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

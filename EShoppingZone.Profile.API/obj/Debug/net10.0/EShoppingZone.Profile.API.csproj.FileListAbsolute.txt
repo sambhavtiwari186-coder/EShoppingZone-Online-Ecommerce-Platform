@@ -169,3 +169,12 @@
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/EShoppingZone.Profile.Tests.csproj.nuget.dgspec.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/project.assets.json
 /home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/EShoppingZone.Profile.Tests/obj/Debug/net10.0/EShoppingZone.Profile.Tests.sourcelink.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.AspNetCore.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Extensions.Hosting.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Extensions.Logging.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Formatting.Compact.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Settings.Configuration.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Sinks.Console.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Sinks.Debug.dll
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Profile.API/bin/Debug/net10.0/Serilog.Sinks.File.dll
