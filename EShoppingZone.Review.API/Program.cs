@@ -10,11 +10,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog
+builder.Host.UseSerilog((context, loggerConfiguration) => {
+    loggerConfiguration
+        .WriteTo.Console()
+        .ReadFrom.Configuration(context.Configuration);
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 // Configure SQLite
 builder.Services.AddDbContext<ReviewDbContext>(opt => opt.UseSqlite("Data Source=reviews.db"));
@@ -107,6 +116,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 // Polly Policies
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()

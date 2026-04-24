@@ -1,6 +1,7 @@
 using EShoppingZone.Wallet.API.Domain;
 using EShoppingZone.Wallet.API.Repositories;
 using EShoppingZone.Wallet.API.HttpClients;
+using Microsoft.Extensions.Logging;
 
 
 namespace EShoppingZone.Wallet.API.Services
@@ -9,11 +10,13 @@ namespace EShoppingZone.Wallet.API.Services
     {
         private readonly IWalletRepository _repository;
         private readonly INotifyClient _notifyClient;
+        private readonly ILogger<WalletService> _logger;
 
-        public WalletService(IWalletRepository repository, INotifyClient notifyClient)
+        public WalletService(IWalletRepository repository, INotifyClient notifyClient, ILogger<WalletService> logger)
         {
             _repository = repository;
             _notifyClient = notifyClient;
+            _logger = logger;
         }
 
 
@@ -53,6 +56,8 @@ namespace EShoppingZone.Wallet.API.Services
                 TransactionRemarks = "Money added to wallet"
             });
 
+            _logger.LogInformation("AUDIT: Wallet {WalletId} credited with {Amount}", walletId, amount);
+
             await _repository.UpdateWalletAsync(wallet);
             await _repository.SaveChangesAsync();
 
@@ -81,6 +86,8 @@ namespace EShoppingZone.Wallet.API.Services
                     OrderId = orderId,
                     TransactionRemarks = $"Payment for order {orderId}"
                 });
+
+                _logger.LogInformation("AUDIT: Wallet {WalletId} debited with {Amount} for Order {OrderId}", walletId, amount, orderId);
 
                 await _repository.UpdateWalletAsync(wallet);
                 await _repository.SaveChangesAsync();

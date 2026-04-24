@@ -9,12 +9,21 @@ using System.Text;
 using EShoppingZone.Product.API.HttpClients;
 using Polly;
 using Polly.Extensions.Http;
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog
+builder.Host.UseSerilog((context, loggerConfiguration) => {
+    loggerConfiguration
+        .WriteTo.Console()
+        .ReadFrom.Configuration(context.Configuration);
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 // Configure SQLite
 builder.Services.AddDbContext<ProductDbContext>(opt => opt.UseSqlite("Data Source=product.db"));
@@ -106,6 +115,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 // Polly Policies
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
