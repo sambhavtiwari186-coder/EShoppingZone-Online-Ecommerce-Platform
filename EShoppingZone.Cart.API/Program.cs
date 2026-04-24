@@ -6,11 +6,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog
+builder.Host.UseSerilog((context, loggerConfiguration) => {
+    loggerConfiguration
+        .WriteTo.Console()
+        .ReadFrom.Configuration(context.Configuration);
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 // Configure SQLite
 builder.Services.AddDbContext<CartDbContext>(opt => opt.UseSqlite("Data Source=cart.db"));
@@ -78,8 +87,17 @@ var app = builder.Build();
 // Auto-migrate on startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<CartDbContext>();
-    db.Database.EnsureCreated();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<CartDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -93,4 +111,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.Run();

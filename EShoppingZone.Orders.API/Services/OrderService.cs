@@ -4,6 +4,7 @@ using EShoppingZone.Orders.API.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using EShoppingZone.Orders.API.HttpClients;
+using Microsoft.Extensions.Logging;
 
 
 namespace EShoppingZone.Orders.API.Services
@@ -16,6 +17,7 @@ namespace EShoppingZone.Orders.API.Services
         private readonly IWalletClient _walletClient;
         private readonly INotifyClient _notifyClient;
         private readonly ICartClient _cartClient;
+        private readonly ILogger<OrderService> _logger;
 
         public OrderService(
             IOrderRepository repository,
@@ -23,7 +25,8 @@ namespace EShoppingZone.Orders.API.Services
             IProductClient productClient,
             IWalletClient walletClient,
             INotifyClient notifyClient,
-            ICartClient cartClient)
+            ICartClient cartClient,
+            ILogger<OrderService> logger)
         {
             _repository = repository;
             _context = context;
@@ -31,6 +34,7 @@ namespace EShoppingZone.Orders.API.Services
             _walletClient = walletClient;
             _notifyClient = notifyClient;
             _cartClient = cartClient;
+            _logger = logger;
         }
 
 
@@ -49,7 +53,10 @@ namespace EShoppingZone.Orders.API.Services
             => await _repository.StoreAddressAsync(orderId, address);
 
         public async Task<bool> ChangeStatusAsync(string status, int orderId)
-            => await _repository.ChangeStatusAsync(status, orderId);
+        {
+            _logger.LogInformation("AUDIT: Changing status of Order {OrderId} to {Status}", orderId, status);
+            return await _repository.ChangeStatusAsync(status, orderId);
+        }
 
         public async Task<bool> CancelOrderAsync(int orderId)
             => await _repository.DeleteOrderAsync(orderId);
@@ -73,6 +80,8 @@ namespace EShoppingZone.Orders.API.Services
                 order.ModeOfPayment = "COD";
                 order.OrderStatus = "Placed";
                 order.OrderDate = DateTime.Now;
+
+                _logger.LogInformation("AUDIT: Placing new COD Order for Customer {CustomerId}, Product {ProductId}, Amount {Amount}", order.CustomerId, order.ProductId, order.Price);
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
@@ -112,6 +121,8 @@ namespace EShoppingZone.Orders.API.Services
                 order.ModeOfPayment = "ONLINE";
                 order.OrderStatus = "Placed";
                 order.OrderDate = DateTime.Now;
+
+                _logger.LogInformation("AUDIT: Placing new ONLINE Order for Customer {CustomerId}, Product {ProductId}, Amount {Amount}", order.CustomerId, order.ProductId, order.Price);
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
