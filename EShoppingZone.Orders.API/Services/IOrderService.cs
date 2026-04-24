@@ -12,5 +12,7 @@ namespace EShoppingZone.Orders.API.Services
         Task<OrderAddress> StoreAddressAsync(int orderId, OrderAddress address);
         Task<bool> ChangeStatusAsync(string status, int orderId);
         Task<bool> CancelOrderAsync(int orderId);
+        Task<bool> VerifyPurchaseAsync(int customerId, int productId);
+
     }
 }

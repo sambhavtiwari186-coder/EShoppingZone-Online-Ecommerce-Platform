@@ -1,21 +1,22 @@
 using EShoppingZone.Review.API.Domain;
 using EShoppingZone.Review.API.Repositories;
 using System.Text.Json;
+using EShoppingZone.Review.API.HttpClients;
+
 
 namespace EShoppingZone.Review.API.Services
 {
     public class ReviewService : IReviewService
     {
         private readonly IReviewRepository _repository;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _config;
+        private readonly IOrderClient _orderClient;
 
-        public ReviewService(IReviewRepository repository, IHttpClientFactory httpClientFactory, IConfiguration config)
+        public ReviewService(IReviewRepository repository, IOrderClient orderClient)
         {
             _repository = repository;
-            _httpClientFactory = httpClientFactory;
-            _config = config;
+            _orderClient = orderClient;
         }
+
 
         public async Task<Domain.Review> SubmitReviewAsync(ReviewDto dto)
         {
@@ -98,39 +99,13 @@ namespace EShoppingZone.Review.API.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient("OrderService");
-                var orderBaseUrl = _config["Services:OrderAPI"] ?? "http://localhost:5400";
-                
-                // Get orders by customer
-                // Endpoint mapping from previous EShoppingZone.Orders.API implementation: GET /api/orders/byCustomer/{id}
-                var response = await client.GetAsync($"{orderBaseUrl}/api/orders/byCustomer/{customerId}");
-                if (!response.IsSuccessStatusCode)
-                {
-                    return false;
-                }
-
-                var content = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var orders = JsonSerializer.Deserialize<List<OrderMock>>(content, options);
-
-                if (orders == null || !orders.Any())
-                {
-                    return false;
-                }
-
-                return orders.Any(o => o.ProductId == productId);
+                return await _orderClient.VerifyPurchaseAsync(customerId, productId);
             }
             catch
             {
-                // Unreachable or parsing failed, default to not purchased to be safe
                 return false;
             }
         }
 
-        // Helper class to deserialize minimal required properties from Orders API
-        private class OrderMock
-        {
-            public int ProductId { get; set; }
-        }
     }
 }

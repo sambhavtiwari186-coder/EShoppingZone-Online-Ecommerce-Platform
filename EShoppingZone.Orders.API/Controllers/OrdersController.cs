@@ -103,7 +103,6 @@ namespace EShoppingZone.Orders.API.Controllers
             return Ok(new { Message = $"Order status changed to {status}" });
         }
 
-        // DELETE /api/orders/{id} — CUSTOMER/ADMIN
         [HttpDelete("{id}")]
         [Authorize(Roles = "CUSTOMER,ADMIN")]
         public async Task<IActionResult> CancelOrder(int id)
@@ -112,5 +111,15 @@ namespace EShoppingZone.Orders.API.Controllers
             if (!result) return NotFound(new { Message = "Order not found" });
             return Ok(new { Message = "Order cancelled successfully" });
         }
+
+        // GET /api/orders/verifyPurchase/{custId}/{prodId}
+        [HttpGet("verifyPurchase/{custId}/{prodId}")]
+        [Authorize(Roles = "CUSTOMER,ADMIN")]
+        public async Task<ActionResult<bool>> VerifyPurchase(int custId, int prodId)
+        {
+            var result = await _service.VerifyPurchaseAsync(custId, prodId);
+            return Ok(result);
+        }
+
     }
 }

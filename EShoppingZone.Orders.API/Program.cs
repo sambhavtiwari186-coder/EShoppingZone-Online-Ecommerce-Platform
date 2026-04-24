@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using EShoppingZone.Orders.API.HttpClients;
+using Polly;
+using Polly.Extensions.Http;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,21 +19,36 @@ builder.Services.AddControllers();
 // Configure SQLite
 builder.Services.AddDbContext<OrderDbContext>(opt => opt.UseSqlite("Data Source=orders.db"));
 
-// Configure HttpClient for inter-service calls
-builder.Services.AddHttpClient("ProductService", client =>
+// Configure Typed HttpClients for inter-service calls with Polly
+builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:ProductAPI"] ?? "http://localhost:5079");
-});
+    client.BaseAddress = new Uri(builder.Configuration["Services:ProductAPI"] ?? "http://localhost:5002");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
 
-builder.Services.AddHttpClient("NotifyService", client =>
+builder.Services.AddHttpClient<INotifyClient, NotifyClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://localhost:5300");
-});
+    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://localhost:5007");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
 
-builder.Services.AddHttpClient("WalletService", client =>
+builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:WalletAPI"] ?? "http://localhost:5200");
-});
+    client.BaseAddress = new Uri(builder.Configuration["Services:WalletAPI"] ?? "http://localhost:5005");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
+builder.Services.AddHttpClient<ICartClient, CartClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:CartAPI"] ?? "http://localhost:5003");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
+
 
 // Configure DI
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -109,4 +128,21 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Polly Policies
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+}
+
 app.Run();
+

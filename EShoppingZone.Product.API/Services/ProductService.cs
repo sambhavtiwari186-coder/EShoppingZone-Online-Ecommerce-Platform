@@ -3,21 +3,22 @@ using EShoppingZone.Product.API.Repositories;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text;
+using EShoppingZone.Product.API.HttpClients;
+
 
 namespace EShoppingZone.Product.API.Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _repository;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
+        private readonly INotifyClient _notifyClient;
 
-        public ProductService(IProductRepository repository, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ProductService(IProductRepository repository, INotifyClient notifyClient)
         {
             _repository = repository;
-            _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
+            _notifyClient = notifyClient;
         }
+
 
         public async Task<IEnumerable<Domain.Product>> GetAllProductsAsync()
         {
@@ -76,27 +77,15 @@ namespace EShoppingZone.Product.API.Services
 
         private async Task NotifyLowStock(Domain.Product product)
         {
-            var client = _httpClientFactory.CreateClient();
-            var notifyServiceUrl = _configuration["Services:NotifyServiceUrl"] ?? "http://localhost:5005/api/notify";
-            
-            var notification = new
+            try
             {
-                ProductId = product.ProductId,
-                ProductName = product.ProductName,
-                CurrentStock = product.StockQuantity,
-                Message = $"Low stock alert for {product.ProductName}. Current quantity: {product.StockQuantity}"
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(notification), Encoding.UTF8, "application/json");
-            try 
-            {
-                await client.PostAsync(notifyServiceUrl, content);
+                await _notifyClient.SendNotificationAsync(0, "LOW_STOCK", "Low Stock Alert", $"Product {product.ProductName} is low in stock ({product.StockQuantity} left)");
             }
             catch (Exception ex)
             {
-                // Log error or handle failure to notify
                 Console.WriteLine($"Failed to notify Low Stock: {ex.Message}");
             }
         }
+
     }
 }

@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using EShoppingZone.Wallet.API.HttpClients;
+using Polly;
+using Polly.Extensions.Http;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,15 @@ builder.Services.AddControllers();
 
 // Configure SQLite
 builder.Services.AddDbContext<WalletDbContext>(opt => opt.UseSqlite("Data Source=wallet.db"));
+
+// Configure Typed HttpClient for inter-service calls with Polly
+builder.Services.AddHttpClient<INotifyClient, NotifyClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://localhost:5007");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
 
 // Configure DI
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
@@ -93,4 +106,21 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Polly Policies
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+}
+
 app.Run();
+
