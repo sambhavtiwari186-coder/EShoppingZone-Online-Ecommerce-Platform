@@ -1,16 +1,21 @@
 using EShoppingZone.Wallet.API.Domain;
 using EShoppingZone.Wallet.API.Repositories;
+using EShoppingZone.Wallet.API.HttpClients;
+
 
 namespace EShoppingZone.Wallet.API.Services
 {
     public class WalletService : IWalletService
     {
         private readonly IWalletRepository _repository;
+        private readonly INotifyClient _notifyClient;
 
-        public WalletService(IWalletRepository repository)
+        public WalletService(IWalletRepository repository, INotifyClient notifyClient)
         {
             _repository = repository;
+            _notifyClient = notifyClient;
         }
+
 
         public async Task<EWallet?> GetWalletByIdAsync(int walletId)
         {
@@ -50,7 +55,11 @@ namespace EShoppingZone.Wallet.API.Services
 
             await _repository.UpdateWalletAsync(wallet);
             await _repository.SaveChangesAsync();
+
+            // Notify customer
+            await _notifyClient.SendNotificationAsync(walletId, "WALLET_CREDITED", "Wallet Credited", $"Your wallet has been credited with {amount}");
         }
+
 
         public async Task<EWallet> PayMoneyAsync(int walletId, decimal amount, int orderId)
         {
@@ -76,8 +85,13 @@ namespace EShoppingZone.Wallet.API.Services
                 await _repository.UpdateWalletAsync(wallet);
                 await _repository.SaveChangesAsync();
                 await tx.CommitAsync();
+
+                // Notify customer
+                await _notifyClient.SendNotificationAsync(walletId, "WALLET_DEBITED", "Wallet Debited", $"Your wallet has been debited with {amount} for order {orderId}");
+
                 return wallet;
             }
+
             catch
             {
                 await tx.RollbackAsync();

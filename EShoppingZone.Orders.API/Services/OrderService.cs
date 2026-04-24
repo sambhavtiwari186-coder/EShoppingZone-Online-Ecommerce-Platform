@@ -3,6 +3,8 @@ using EShoppingZone.Orders.API.Domain;
 using EShoppingZone.Orders.API.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using EShoppingZone.Orders.API.HttpClients;
+
 
 namespace EShoppingZone.Orders.API.Services
 {
@@ -10,20 +12,29 @@ namespace EShoppingZone.Orders.API.Services
     {
         private readonly IOrderRepository _repository;
         private readonly OrderDbContext _context;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _config;
+        private readonly IProductClient _productClient;
+        private readonly IWalletClient _walletClient;
+        private readonly INotifyClient _notifyClient;
+        private readonly ICartClient _cartClient;
 
         public OrderService(
             IOrderRepository repository,
             OrderDbContext context,
-            IHttpClientFactory httpClientFactory,
-            IConfiguration config)
+            IProductClient productClient,
+            IWalletClient walletClient,
+            INotifyClient notifyClient,
+            ICartClient cartClient)
         {
             _repository = repository;
             _context = context;
-            _httpClientFactory = httpClientFactory;
-            _config = config;
+            _productClient = productClient;
+            _walletClient = walletClient;
+            _notifyClient = notifyClient;
+            _cartClient = cartClient;
         }
+
+
+
 
         public async Task<IEnumerable<Order>> GetAllOrdersAsync()
             => await _repository.GetAllOrdersAsync();
@@ -42,6 +53,13 @@ namespace EShoppingZone.Orders.API.Services
 
         public async Task<bool> CancelOrderAsync(int orderId)
             => await _repository.DeleteOrderAsync(orderId);
+
+        public async Task<bool> VerifyPurchaseAsync(int customerId, int productId)
+        {
+            var orders = await _repository.GetOrdersByCustomerAsync(customerId);
+            return orders.Any(o => o.ProductId == productId);
+        }
+
 
         /// <summary>
         /// PlaceOrder — COD. Uses EF Core transaction + inter-service calls (IHttpClientFactory).
@@ -65,6 +83,10 @@ namespace EShoppingZone.Orders.API.Services
                 // Notify customer via Notify-Service
                 await SendNotificationAsync(order.CustomerId, "ORDER_PLACED");
 
+                // Clear cart
+                await _cartClient.ClearCartAsync(order.CustomerId);
+
+
                 await tx.CommitAsync();
                 return order;
             }
@@ -84,7 +106,8 @@ namespace EShoppingZone.Orders.API.Services
             try
             {
                 // Deduct from wallet via Wallet-Service
-                await DeductWalletAsync(order.CustomerId, order.AmountPaid);
+                await DeductWalletAsync(order.CustomerId, order.AmountPaid, order.OrderId);
+
 
                 order.ModeOfPayment = "ONLINE";
                 order.OrderStatus = "Placed";
@@ -98,6 +121,10 @@ namespace EShoppingZone.Orders.API.Services
 
                 // Notify customer
                 await SendNotificationAsync(order.CustomerId, "ORDER_PLACED_ONLINE");
+
+                // Clear cart
+                await _cartClient.ClearCartAsync(order.CustomerId);
+
 
                 await tx.CommitAsync();
                 return order;
@@ -113,22 +140,15 @@ namespace EShoppingZone.Orders.API.Services
 
         private async Task DecrementStockAsync(int productId, int qty)
         {
-            var client = _httpClientFactory.CreateClient("ProductService");
-            var productBaseUrl = _config["Services:ProductAPI"] ?? "http://localhost:5079";
-            var response = await client.PutAsync(
-                $"{productBaseUrl}/api/products/decrementStock/{productId}/{qty}", null);
-            response.EnsureSuccessStatusCode();
+            var success = await _productClient.DecrementStockAsync(productId, qty);
+            if (!success) throw new Exception("Failed to decrement stock via Product-Service");
         }
 
         private async Task SendNotificationAsync(int customerId, string eventType)
         {
             try
             {
-                var client = _httpClientFactory.CreateClient("NotifyService");
-                var notifyBaseUrl = _config["Services:NotifyAPI"] ?? "http://localhost:5300";
-                var payload = JsonSerializer.Serialize(new { CustomerId = customerId, EventType = eventType });
-                var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-                await client.PostAsync($"{notifyBaseUrl}/api/notify/send", content);
+                await _notifyClient.SendNotificationAsync(customerId, eventType, "Order Update", $"Your order status: {eventType}");
             }
             catch
             {
@@ -136,14 +156,11 @@ namespace EShoppingZone.Orders.API.Services
             }
         }
 
-        private async Task DeductWalletAsync(int customerId, decimal amount)
+        private async Task DeductWalletAsync(int customerId, decimal amount, int orderId = 0)
         {
-            var client = _httpClientFactory.CreateClient("WalletService");
-            var walletBaseUrl = _config["Services:WalletAPI"] ?? "http://localhost:5200";
-            var payload = JsonSerializer.Serialize(new { CustomerId = customerId, Amount = amount });
-            var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{walletBaseUrl}/api/wallet/pay", content);
-            response.EnsureSuccessStatusCode();
+            var success = await _walletClient.PayMoneyAsync(customerId, amount, orderId);
+            if (!success) throw new Exception("Wallet deduction failed or insufficient balance");
         }
+
     }
 }

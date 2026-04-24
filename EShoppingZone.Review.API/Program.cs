@@ -1,4 +1,8 @@
 using EShoppingZone.Review.API.Data;
+using EShoppingZone.Review.API.HttpClients;
+using Polly;
+using Polly.Extensions.Http;
+
 using EShoppingZone.Review.API.Repositories;
 using EShoppingZone.Review.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,12 +19,15 @@ builder.Services.AddControllers();
 // Configure SQLite
 builder.Services.AddDbContext<ReviewDbContext>(opt => opt.UseSqlite("Data Source=reviews.db"));
 
-// Configure HttpClient for inter-service calls (OrderService)
-builder.Services.AddHttpClient("OrderService", client =>
+// Configure Typed HttpClient for inter-service calls (OrderService) with Polly
+builder.Services.AddHttpClient<IOrderClient, OrderClient>(client =>
 {
-    var baseAddress = builder.Configuration["Services:OrderAPI"] ?? "http://localhost:5400";
+    var baseAddress = builder.Configuration["Services:OrderAPI"] ?? "http://localhost:5004";
     client.BaseAddress = new Uri(baseAddress);
-});
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
 
 // Configure DI
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
@@ -100,4 +107,21 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Polly Policies
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+}
+
 app.Run();
+
