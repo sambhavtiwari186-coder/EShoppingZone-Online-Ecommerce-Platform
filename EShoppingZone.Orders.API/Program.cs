@@ -26,7 +26,8 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // Configure SQLite
-builder.Services.AddDbContext<OrderDbContext>(opt => opt.UseSqlite("Data Source=orders.db"));
+builder.Services.AddDbContext<OrderDbContext>(opt => 
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db"));
 
 // Configure Typed HttpClients for inter-service calls with Polly
 builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>

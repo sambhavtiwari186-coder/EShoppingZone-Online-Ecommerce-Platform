@@ -26,7 +26,8 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // Configure SQLite
-builder.Services.AddDbContext<WalletDbContext>(opt => opt.UseSqlite("Data Source=wallet.db"));
+builder.Services.AddDbContext<WalletDbContext>(opt => 
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=wallet.db"));
 
 // Configure Typed HttpClient for inter-service calls with Polly
 builder.Services.AddHttpClient<INotifyClient, NotifyClient>(client =>

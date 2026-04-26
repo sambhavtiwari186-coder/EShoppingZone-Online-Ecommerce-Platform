@@ -22,7 +22,8 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // Configure SQLite
-builder.Services.AddDbContext<CartDbContext>(opt => opt.UseSqlite("Data Source=cart.db"));
+builder.Services.AddDbContext<CartDbContext>(opt => 
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=cart.db"));
 
 // Configure DI
 builder.Services.AddScoped<ICartRepository, CartRepository>();
