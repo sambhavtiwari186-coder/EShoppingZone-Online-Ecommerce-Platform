@@ -24,7 +24,8 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // Configure SQLite
-builder.Services.AddDbContext<ProfileDbContext>(opt => opt.UseSqlite("Data Source=profile.db"));
+builder.Services.AddDbContext<ProfileDbContext>(opt => 
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=profile.db"));
 
 // Configure DI
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();

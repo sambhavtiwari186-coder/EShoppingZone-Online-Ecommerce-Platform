@@ -20,15 +20,16 @@ services:
       context: ./EShoppingZone.Profile.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/profile.db
     volumes:
       - profile-data:/app/data
-    # Use environment to override SQLite path if needed, but default is fine
 
   product-api:
     build:
       context: ./EShoppingZone.Product.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/product.db
     volumes:
       - product-data:/app/data
 
@@ -37,6 +38,7 @@ services:
       context: ./EShoppingZone.Cart.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/cart.db
     volumes:
       - cart-data:/app/data
 
@@ -45,6 +47,7 @@ services:
       context: ./EShoppingZone.Orders.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/orders.db
       - Services__ProductAPI=http://product-api:8080
       - Services__CartAPI=http://cart-api:8080
       - Services__WalletAPI=http://wallet-api:8080
@@ -57,6 +60,7 @@ services:
       context: ./EShoppingZone.Wallet.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/wallet.db
       - Services__NotifyAPI=http://notify-api:8080
     volumes:
       - wallet-data:/app/data
@@ -66,6 +70,7 @@ services:
       context: ./EShoppingZone.Review.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=data/reviews.db
       - Services__OrderAPI=http://order-api:8080
     volumes:
       - review-data:/app/data
@@ -75,7 +80,7 @@ services:
       context: ./EShoppingZone.Notify.API
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Data Source=notify.db
+      - ConnectionStrings__DefaultConnection=Data Source=data/notify.db
     volumes:
       - notify-data:/app/data
 
