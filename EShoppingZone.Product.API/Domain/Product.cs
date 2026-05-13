@@ -14,6 +14,7 @@ namespace EShoppingZone.Product.API.Domain
         public int StockQuantity { get; set; }
 
         // Complex JSON fields
+        public int MerchantId { get; set; }
         public Dictionary<string, string>? Rating { get; set; }
         public Dictionary<string, string>? Review { get; set; }
         public List<string>? Image { get; set; }

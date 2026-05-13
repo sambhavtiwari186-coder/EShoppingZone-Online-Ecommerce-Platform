@@ -2,6 +2,7 @@ using EShoppingZone.Profile.API.Data;
 using EShoppingZone.Profile.API.Domain;
 using EShoppingZone.Profile.API.Repositories;
 using EShoppingZone.Profile.API.Services;
+using EShoppingZone.Profile.API.HttpClients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,13 @@ builder.Host.UseSerilog((context, loggerConfiguration) => {
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", policy => policy
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 // Configure SQLite
 builder.Services.AddDbContext<ProfileDbContext>(opt => 
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=profile.db"));
@@ -31,6 +39,12 @@ builder.Services.AddDbContext<ProfileDbContext>(opt =>
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddSingleton<IPasswordHasher<UserProfile>, PasswordHasher<UserProfile>>();
+
+// Configure HttpClients
+builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:WalletUrl"] ?? "http://localhost:5005");
+});
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "SecretKeyVeryLongStringToSignToken1234!";
@@ -95,7 +109,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ProfileDbContext>();
-        context.Database.Migrate();
+        var hasher = services.GetRequiredService<IPasswordHasher<UserProfile>>();
+        context.Database.EnsureCreated();
+        DbInitializer.Initialize(context, hasher);
     }
     catch (Exception ex)
     {
@@ -112,6 +128,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

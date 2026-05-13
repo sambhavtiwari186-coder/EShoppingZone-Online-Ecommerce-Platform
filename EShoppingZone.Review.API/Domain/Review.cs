@@ -7,6 +7,7 @@ namespace EShoppingZone.Review.API.Domain
         [Key]
         public int ReviewId { get; set; }
         public int ProductId { get; set; }
+        public int OrderId { get; set; }
         public int CustomerId { get; set; }
         public string CustomerName { get; set; } = string.Empty;
         public int Rating { get; set; } // 1-5

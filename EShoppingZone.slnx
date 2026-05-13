@@ -1,0 +1,18 @@
+<Solution>
+  <Project Path="EShoppingZone.Cart.API/EShoppingZone.Cart.API.csproj" />
+  <Project Path="EShoppingZone.Cart.API/EShoppingZone.Cart.Tests/EShoppingZone.Cart.Tests.csproj" />
+
+  <Project Path="EShoppingZone.Gateway/EShoppingZone.Gateway.csproj" />
+  <Project Path="EShoppingZone.Notify.API/EShoppingZone.Notify.API.csproj" />
+  <Project Path="EShoppingZone.Notify.API/EShoppingZone.Notify.Tests/EShoppingZone.Notify.Tests.csproj" />
+  <Project Path="EShoppingZone.Orders.API/EShoppingZone.Orders.API.csproj" />
+  <Project Path="EShoppingZone.Orders.API/EShoppingZone.Orders.Tests/EShoppingZone.Orders.Tests.csproj" />
+  <Project Path="EShoppingZone.Product.API/EShoppingZone.Product.API.csproj" />
+  <Project Path="EShoppingZone.Product.API/EShoppingZone.Product.Tests/EShoppingZone.Product.Tests.csproj" />
+  <Project Path="EShoppingZone.Profile.API/EShoppingZone.Profile.API.csproj" />
+  <Project Path="EShoppingZone.Profile.API/EShoppingZone.Profile.Tests/EShoppingZone.Profile.Tests.csproj" />
+  <Project Path="EShoppingZone.Review.API/EShoppingZone.Review.API.csproj" />
+  <Project Path="EShoppingZone.Review.API/EShoppingZone.Review.Tests/EShoppingZone.Review.Tests.csproj" />
+  <Project Path="EShoppingZone.Wallet.API/EShoppingZone.Wallet.API.csproj" />
+  <Project Path="EShoppingZone.Wallet.API/EShoppingZone.Wallet.Tests/EShoppingZone.Wallet.Tests.csproj" />
+</Solution>

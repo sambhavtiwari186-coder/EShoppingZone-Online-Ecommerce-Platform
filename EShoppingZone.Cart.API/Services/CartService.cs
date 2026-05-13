@@ -76,7 +76,8 @@ namespace EShoppingZone.Cart.API.Services
                     ProductName = wishlist.ProductName,
                     Price = wishlist.Price,
                     Quantity = 1,
-                    CartId = cart.CartId
+                    CartId = cart.CartId,
+                    ImageUrl = wishlist.ImageUrl
                 });
             }
 

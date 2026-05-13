@@ -1,0 +1,11 @@
+﻿/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/Program.cs
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/obj/Debug/net10.0/EShoppingZone.Gateway.GlobalUsings.g.cs
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/obj/Debug/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/obj/Debug/net10.0/EShoppingZone.Gateway.AssemblyInfo.cs
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/obj/Debug/net10.0/EShoppingZone.Gateway.MvcApplicationPartsAssemblyInfo.cs
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/appsettings.Development.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/appsettings.Docker.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/appsettings.json
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/Dockerfile
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/EShoppingZone.Gateway.http
+/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Gateway/Properties/launchSettings.json

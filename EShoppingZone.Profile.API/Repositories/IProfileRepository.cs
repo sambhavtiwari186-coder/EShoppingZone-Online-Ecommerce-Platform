@@ -13,5 +13,10 @@ namespace EShoppingZone.Profile.API.Repositories
         Task AddProfileAsync(UserProfile profile);
         Task UpdateProfileAsync(UserProfile profile);
         Task DeleteProfileAsync(int id);
+
+        // Delivery Agent methods
+        Task AddDeliveryAgentAsync(DeliveryAgent agent);
+        Task<IEnumerable<DeliveryAgent>> GetAllDeliveryAgentsAsync();
+        Task DeleteDeliveryAgentAsync(int id);
     }
 }

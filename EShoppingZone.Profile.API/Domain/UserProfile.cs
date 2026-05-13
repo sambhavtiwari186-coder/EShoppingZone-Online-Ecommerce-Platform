@@ -31,6 +31,7 @@ namespace EShoppingZone.Profile.API.Domain
         public string Role { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
+        public bool IsSuspended { get; set; } = false;
 
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
     }

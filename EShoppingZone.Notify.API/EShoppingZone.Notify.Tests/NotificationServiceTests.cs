@@ -3,24 +3,26 @@ using EShoppingZone.Notify.API.Repositories;
 using EShoppingZone.Notify.API.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
+using NUnit.Framework;
 
 namespace EShoppingZone.Notify.Tests
 {
+    [TestFixture]
     public class NotificationServiceTests
     {
-        private readonly Mock<INotificationRepository> _mockRepo;
-        private readonly Mock<ILogger<NotificationService>> _mockLogger;
-        private readonly NotificationService _service;
+        private Mock<INotificationRepository> _mockRepo = null!;
+        private Mock<ILogger<NotificationService>> _mockLogger = null!;
+        private NotificationService _service = null!;
 
-        public NotificationServiceTests()
+        [SetUp]
+        public void Setup()
         {
             _mockRepo = new Mock<INotificationRepository>();
             _mockLogger = new Mock<ILogger<NotificationService>>();
             _service = new NotificationService(_mockRepo.Object, _mockLogger.Object);
         }
 
-        [Fact]
+        [Test]
         public async Task CreateNotificationAsync_ShouldSaveNotification()
         {
             // Arrange
@@ -38,17 +40,17 @@ namespace EShoppingZone.Notify.Tests
             var result = await _service.CreateNotificationAsync(userId, type, title, message);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(userId, result.UserId);
-            Assert.Equal(type, result.Type);
-            Assert.Equal("Order Placed", result.Title);
-            Assert.Equal("Your order has been placed.", result.Message);
-            Assert.False(result.IsRead);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.UserId, Is.EqualTo(userId));
+            Assert.That(result.Type, Is.EqualTo(type));
+            Assert.That(result.Title, Is.EqualTo("Order Placed"));
+            Assert.That(result.Message, Is.EqualTo("Your order has been placed."));
+            Assert.That(result.IsRead, Is.False);
 
             _mockRepo.Verify(r => r.CreateNotificationAsync(It.IsAny<Notification>()), Times.Once);
         }
 
-        [Fact]
+        [Test]
         public async Task GetUnreadCountAsync_ShouldReturnUnreadCount()
         {
             // Arrange
@@ -59,10 +61,10 @@ namespace EShoppingZone.Notify.Tests
             var result = await _service.GetUnreadCountAsync(userId);
 
             // Assert
-            Assert.Equal(3, result);
+            Assert.That(result, Is.EqualTo(3));
         }
 
-        [Fact]
+        [Test]
         public async Task MarkAsReadAsync_ShouldUpdateIsRead()
         {
             // Arrange
@@ -74,8 +76,8 @@ namespace EShoppingZone.Notify.Tests
             var result = await _service.MarkAsReadAsync(id);
 
             // Assert
-            Assert.True(result);
-            Assert.True(notification.IsRead);
+            Assert.That(result, Is.True);
+            Assert.That(notification.IsRead, Is.True);
             _mockRepo.Verify(r => r.UpdateNotificationAsync(notification), Times.Once);
         }
     }

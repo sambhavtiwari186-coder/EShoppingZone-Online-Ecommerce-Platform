@@ -112,13 +112,33 @@ namespace EShoppingZone.Orders.API.Controllers
             return Ok(new { Message = "Order cancelled successfully" });
         }
 
-        // GET /api/orders/verifyPurchase/{custId}/{prodId}
         [HttpGet("verifyPurchase/{custId}/{prodId}")]
-        [Authorize(Roles = "CUSTOMER,ADMIN")]
+        [AllowAnonymous]
         public async Task<ActionResult<bool>> VerifyPurchase(int custId, int prodId)
         {
             var result = await _service.VerifyPurchaseAsync(custId, prodId);
             return Ok(result);
+        }
+
+        [HttpGet("totalCount")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<int>> GetTotalOrdersCount()
+        {
+            return Ok(await _service.GetTotalOrdersCountAsync());
+        }
+
+        [HttpGet("totalRevenue")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<decimal>> GetTotalRevenue()
+        {
+            return Ok(await _service.GetTotalRevenueAsync());
+        }
+
+        [HttpGet("topProducts")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<IEnumerable<object>>> GetTopProducts([FromQuery] int count = 5)
+        {
+            return Ok(await _service.GetTopProductsAsync(count));
         }
 
     }

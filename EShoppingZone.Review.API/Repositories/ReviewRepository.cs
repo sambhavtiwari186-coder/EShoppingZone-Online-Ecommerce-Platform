@@ -48,10 +48,10 @@ namespace EShoppingZone.Review.API.Repositories
             return true;
         }
 
-        public async Task<bool> HasCustomerReviewedAsync(int productId, int customerId)
+        public async Task<bool> HasCustomerReviewedAsync(int productId, int customerId, int orderId)
         {
             return await _context.Reviews
-                .AnyAsync(r => r.ProductId == productId && r.CustomerId == customerId);
+                .AnyAsync(r => r.ProductId == productId && r.CustomerId == customerId && r.OrderId == orderId);
         }
 
         public async Task<bool> AddReviewVoteAsync(ReviewVote vote)

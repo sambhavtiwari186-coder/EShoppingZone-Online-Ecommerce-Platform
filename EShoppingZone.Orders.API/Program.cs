@@ -10,9 +10,22 @@ using EShoppingZone.Orders.API.HttpClients;
 using Polly;
 using Polly.Extensions.Http;
 using Serilog;
-
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"] ?? "localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+});
 
 // Configure Serilog
 builder.Host.UseSerilog((context, loggerConfiguration) => {
@@ -24,6 +37,13 @@ builder.Host.UseSerilog((context, loggerConfiguration) => {
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", policy => policy
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
 
 // Configure SQLite
 builder.Services.AddDbContext<OrderDbContext>(opt => 
@@ -144,6 +164,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

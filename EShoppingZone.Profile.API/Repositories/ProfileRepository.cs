@@ -61,5 +61,26 @@ namespace EShoppingZone.Profile.API.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task AddDeliveryAgentAsync(DeliveryAgent agent)
+        {
+            await _context.DeliveryAgents.AddAsync(agent);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<DeliveryAgent>> GetAllDeliveryAgentsAsync()
+        {
+            return await _context.DeliveryAgents.ToListAsync();
+        }
+
+        public async Task DeleteDeliveryAgentAsync(int id)
+        {
+            var agent = await _context.DeliveryAgents.FindAsync(id);
+            if (agent != null)
+            {
+                _context.DeliveryAgents.Remove(agent);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

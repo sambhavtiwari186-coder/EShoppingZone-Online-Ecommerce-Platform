@@ -3,22 +3,24 @@ using EShoppingZone.Review.API.Domain;
 using EShoppingZone.Review.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
+using NUnit.Framework;
 
 namespace EShoppingZone.Review.Tests
 {
+    [TestFixture]
     public class ReviewsControllerTests
     {
-        private readonly Mock<IReviewService> _mockService;
-        private readonly ReviewsController _controller;
+        private Mock<IReviewService> _mockService = null!;
+        private ReviewsController _controller = null!;
 
-        public ReviewsControllerTests()
+        [SetUp]
+        public void Setup()
         {
             _mockService = new Mock<IReviewService>();
             _controller = new ReviewsController(_mockService.Object);
         }
 
-        [Fact]
+        [Test]
         public async Task SubmitReview_ValidDto_ReturnsOk()
         {
             // Arrange
@@ -30,12 +32,14 @@ namespace EShoppingZone.Review.Tests
             var result = await _controller.SubmitReview(dto);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<API.Domain.Review>(okResult.Value);
-            Assert.Equal(expectedReview.ReviewId, returnValue.ReviewId);
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = (OkObjectResult)result.Result!;
+            Assert.That(okResult.Value, Is.InstanceOf<API.Domain.Review>());
+            var returnValue = (API.Domain.Review)okResult.Value!;
+            Assert.That(returnValue.ReviewId, Is.EqualTo(expectedReview.ReviewId));
         }
 
-        [Fact]
+        [Test]
         public async Task GetReviewsByProduct_ReturnsOkWithReviews()
         {
             // Arrange
@@ -47,12 +51,14 @@ namespace EShoppingZone.Review.Tests
             var result = await _controller.GetReviewsByProduct(productId);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsAssignableFrom<IEnumerable<API.Domain.Review>>(okResult.Value);
-            Assert.Single(returnValue);
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = (OkObjectResult)result.Result!;
+            Assert.That(okResult.Value, Is.InstanceOf<IEnumerable<API.Domain.Review>>());
+            var returnValue = (IEnumerable<API.Domain.Review>)okResult.Value!;
+            Assert.That(returnValue.Count(), Is.EqualTo(1));
         }
 
-        [Fact]
+        [Test]
         public async Task GetAverageRating_ReturnsOkWithRating()
         {
             // Arrange
@@ -64,12 +70,12 @@ namespace EShoppingZone.Review.Tests
             var result = await _controller.GetAverageRating(productId);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<double>(okResult.Value);
-            Assert.Equal(expectedRating, returnValue);
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = (OkObjectResult)result.Result!;
+            Assert.That(okResult.Value, Is.EqualTo(expectedRating));
         }
 
-        [Fact]
+        [Test]
         public async Task DeleteReview_ReturnsOk_WhenSuccessful()
         {
             // Arrange
@@ -81,11 +87,12 @@ namespace EShoppingZone.Review.Tests
             var result = await _controller.DeleteReview(reviewId, customerId);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.NotNull(okResult.Value);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = (OkObjectResult)result;
+            Assert.That(okResult.Value, Is.Not.Null);
         }
 
-        [Fact]
+        [Test]
         public async Task DeleteReview_ReturnsNotFound_WhenUnsuccessful()
         {
             // Arrange
@@ -97,8 +104,9 @@ namespace EShoppingZone.Review.Tests
             var result = await _controller.DeleteReview(reviewId, customerId);
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.NotNull(notFoundResult.Value);
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.That(notFoundResult.Value, Is.Not.Null);
         }
     }
 }

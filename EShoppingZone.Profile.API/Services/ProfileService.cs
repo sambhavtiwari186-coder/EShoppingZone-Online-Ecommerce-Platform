@@ -2,6 +2,7 @@ using EShoppingZone.Profile.API.Domain;
 using EShoppingZone.Profile.API.Repositories;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using EShoppingZone.Profile.API.HttpClients;
 
 namespace EShoppingZone.Profile.API.Services
 {
@@ -9,11 +10,13 @@ namespace EShoppingZone.Profile.API.Services
     {
         private readonly IProfileRepository _profileRepository;
         private readonly IPasswordHasher<UserProfile> _passwordHasher;
+        private readonly IWalletClient _walletClient;
 
-        public ProfileService(IProfileRepository profileRepository, IPasswordHasher<UserProfile> passwordHasher)
+        public ProfileService(IProfileRepository profileRepository, IPasswordHasher<UserProfile> passwordHasher, IWalletClient walletClient)
         {
             _profileRepository = profileRepository;
             _passwordHasher = passwordHasher;
+            _walletClient = walletClient;
         }
 
         public async Task<UserProfile?> FindByMobileNumberAsync(long mobileNumber)
@@ -46,6 +49,9 @@ namespace EShoppingZone.Profile.API.Services
             profile.Role = "CUSTOMER";
             profile.Password = _passwordHasher.HashPassword(profile, profile.Password);
             await _profileRepository.AddProfileAsync(profile);
+            
+            // Auto-create wallet for new customer
+            await _walletClient.CreateWalletAsync(profile.ProfileId);
         }
 
         public async Task AddMerchantAsync(UserProfile profile)
@@ -70,6 +76,41 @@ namespace EShoppingZone.Profile.API.Services
         {
             var result = _passwordHasher.VerifyHashedPassword(user, user.Password, providedPassword);
             return result == PasswordVerificationResult.Success;
+        }
+
+        public async Task SuspendUserAsync(int profileId)
+        {
+            var profile = await _profileRepository.GetProfileByIdAsync(profileId);
+            if (profile != null)
+            {
+                profile.IsSuspended = true;
+                await _profileRepository.UpdateProfileAsync(profile);
+            }
+        }
+
+        public async Task ReactivateUserAsync(int profileId)
+        {
+            var profile = await _profileRepository.GetProfileByIdAsync(profileId);
+            if (profile != null)
+            {
+                profile.IsSuspended = false;
+                await _profileRepository.UpdateProfileAsync(profile);
+            }
+        }
+
+        public async Task RegisterDeliveryAgentAsync(DeliveryAgent agent)
+        {
+            await _profileRepository.AddDeliveryAgentAsync(agent);
+        }
+
+        public async Task<IEnumerable<DeliveryAgent>> GetAllDeliveryAgentsAsync()
+        {
+            return await _profileRepository.GetAllDeliveryAgentsAsync();
+        }
+
+        public async Task DeleteDeliveryAgentAsync(int id)
+        {
+            await _profileRepository.DeleteDeliveryAgentAsync(id);
         }
     }
 }

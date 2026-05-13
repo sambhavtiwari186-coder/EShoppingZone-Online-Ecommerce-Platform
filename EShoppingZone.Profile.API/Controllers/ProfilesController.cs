@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EShoppingZone.Profile.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/profiles")]
     [Authorize]
     public class ProfilesController : ControllerBase
     {
@@ -39,6 +39,14 @@ namespace EShoppingZone.Profile.API.Controllers
         {
             var profiles = await _profileService.GetAllProfilesAsync();
             return Ok(profiles);
+        }
+
+        [HttpGet("count")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetUserCount()
+        {
+            var profiles = await _profileService.GetAllProfilesAsync();
+            return Ok(profiles.Count());
         }
 
         [HttpGet("byId/{id}")]
@@ -77,6 +85,46 @@ namespace EShoppingZone.Profile.API.Controllers
         public async Task<IActionResult> DeleteProfile(int id)
         {
             await _profileService.DeleteProfileAsync(id);
+            return Ok();
+        }
+
+        [HttpPut("suspend/{id}")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> SuspendUser(int id)
+        {
+            await _profileService.SuspendUserAsync(id);
+            return Ok(new { Message = "User suspended successfully" });
+        }
+
+        [HttpPut("reactivate/{id}")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> ReactivateUser(int id)
+        {
+            await _profileService.ReactivateUserAsync(id);
+            return Ok(new { Message = "User reactivated successfully" });
+        }
+
+        [HttpPost("deliveryAgents")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> RegisterDeliveryAgent([FromBody] DeliveryAgent agent)
+        {
+            await _profileService.RegisterDeliveryAgentAsync(agent);
+            return Ok(agent);
+        }
+
+        [HttpGet("deliveryAgents")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetAllDeliveryAgents()
+        {
+            var agents = await _profileService.GetAllDeliveryAgentsAsync();
+            return Ok(agents);
+        }
+
+        [HttpDelete("deliveryAgents/{id}")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> DeleteDeliveryAgent(int id)
+        {
+            await _profileService.DeleteDeliveryAgentAsync(id);
             return Ok();
         }
     }

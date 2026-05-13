@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShoppingZone.Notify.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/notifications")]
     [ApiController]
     public class NotificationsController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace EShoppingZone.Notify.API.Controllers
         }
 
         [HttpGet("{userId}")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize]
         public async Task<IActionResult> GetNotifications(int userId)
         {
             var notifications = await _service.GetNotificationsByUserIdAsync(userId);
@@ -32,7 +32,7 @@ namespace EShoppingZone.Notify.API.Controllers
         }
 
         [HttpGet("{userId}/unread")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize]
         public async Task<IActionResult> GetUnreadCount(int userId)
         {
             var count = await _service.GetUnreadCountAsync(userId);
@@ -40,7 +40,7 @@ namespace EShoppingZone.Notify.API.Controllers
         }
 
         [HttpPut("{id}/read")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize]
         public async Task<IActionResult> MarkAsRead(int id)
         {
             var success = await _service.MarkAsReadAsync(id);
@@ -49,7 +49,7 @@ namespace EShoppingZone.Notify.API.Controllers
         }
 
         [HttpPut("read-all/{uid}")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize]
         public async Task<IActionResult> MarkAllAsRead(int uid)
         {
             await _service.MarkAllAsReadAsync(uid);
@@ -57,7 +57,7 @@ namespace EShoppingZone.Notify.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize]
         public async Task<IActionResult> DeleteNotification(int id)
         {
             var success = await _service.DeleteNotificationAsync(id);

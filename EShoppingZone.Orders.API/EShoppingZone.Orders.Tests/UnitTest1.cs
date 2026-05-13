@@ -1,10 +1,11 @@
-﻿namespace EShoppingZone.Orders.Tests;
+namespace EShoppingZone.Orders.Tests;
 
+[TestFixture]
 public class UnitTest1
 {
-    [Fact]
+    [Test]
     public void Test1()
     {
-
+        Assert.Pass();
     }
 }
