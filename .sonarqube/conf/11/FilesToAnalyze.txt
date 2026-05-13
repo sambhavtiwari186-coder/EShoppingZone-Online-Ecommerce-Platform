@@ -1,0 +1,8 @@
+﻿/home/sambhav/Downloads/sambhav/E-commerce Backend/EShoppingZone.Wallet.API/EShoppingZone.Wallet.Tests/UnitTest1.cs
+/home/sambhav/.nuget/packages/microsoft.net.test.sdk/17.14.0/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/NUnit3.TestAdapter.pdb
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/nunit.engine.dll
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/nunit.engine.api.dll
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/nunit.engine.core.dll
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/testcentric.engine.metadata.dll
+/home/sambhav/.nuget/packages/nunit3testadapter/5.0.0/build/netcoreapp3.1/NUnit3.TestAdapter.dll

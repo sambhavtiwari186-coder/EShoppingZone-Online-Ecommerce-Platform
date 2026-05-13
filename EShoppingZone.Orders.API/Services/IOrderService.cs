@@ -14,5 +14,9 @@ namespace EShoppingZone.Orders.API.Services
         Task<bool> CancelOrderAsync(int orderId);
         Task<bool> VerifyPurchaseAsync(int customerId, int productId);
 
+        // Analytics
+        Task<int> GetTotalOrdersCountAsync();
+        Task<decimal> GetTotalRevenueAsync();
+        Task<IEnumerable<object>> GetTopProductsAsync(int count);
     }
 }

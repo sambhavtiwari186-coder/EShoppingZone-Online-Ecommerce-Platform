@@ -71,5 +71,37 @@ namespace EShoppingZone.Product.API.Repositories
                 .Where(p => p.ProductId == productId)
                 .ExecuteUpdateAsync(s => s.SetProperty(p => p.StockQuantity, p => p.StockQuantity - qty));
         }
+
+        public async Task<int> IncrementStockAsync(int productId, int qty)
+        {
+            return await _context.Products
+                .Where(p => p.ProductId == productId)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.StockQuantity, p => p.StockQuantity + qty));
+        }
+
+        public async Task<IEnumerable<string>> GetAllCategoriesAsync()
+        {
+            return await _context.Products.Select(p => p.Category).Distinct().ToListAsync();
+        }
+
+        public async Task<IEnumerable<Domain.Product>> GetProductsByMerchantIdAsync(int merchantId)
+        {
+            return await _context.Products.Where(p => p.MerchantId == merchantId).ToListAsync();
+        }
+
+        public async Task AddStockMovementAsync(StockMovement movement)
+        {
+            await _context.StockMovements.AddAsync(movement);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<StockMovement>> GetStockMovementsByMerchantIdAsync(int merchantId)
+        {
+            return await _context.StockMovements
+                .Where(m => m.MerchantId == merchantId)
+                .OrderByDescending(m => m.Timestamp)
+                .Take(20)
+                .ToListAsync();
+        }
     }
 }

@@ -41,7 +41,6 @@ namespace EShoppingZone.Cart.API.Controllers
         }
 
         [HttpPut("update")]
-        [Authorize(Roles = "CUSTOMER,ADMIN")]
         public async Task<ActionResult<Domain.Cart>> UpdateCart([FromQuery] int userId, [FromBody] List<CartItem> items)
         {
             var cart = await _service.UpdateCartAsync(userId, items);

@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using EShoppingZone.Orders.API.HttpClients;
 using Microsoft.Extensions.Logging;
-
+using MassTransit;
+using EShoppingZone.Orders.API.Events;
 
 namespace EShoppingZone.Orders.API.Services
 {
@@ -18,6 +19,7 @@ namespace EShoppingZone.Orders.API.Services
         private readonly INotifyClient _notifyClient;
         private readonly ICartClient _cartClient;
         private readonly ILogger<OrderService> _logger;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public OrderService(
             IOrderRepository repository,
@@ -26,7 +28,8 @@ namespace EShoppingZone.Orders.API.Services
             IWalletClient walletClient,
             INotifyClient notifyClient,
             ICartClient cartClient,
-            ILogger<OrderService> logger)
+            ILogger<OrderService> logger,
+            IPublishEndpoint publishEndpoint)
         {
             _repository = repository;
             _context = context;
@@ -35,6 +38,7 @@ namespace EShoppingZone.Orders.API.Services
             _notifyClient = notifyClient;
             _cartClient = cartClient;
             _logger = logger;
+            _publishEndpoint = publishEndpoint;
         }
 
 
@@ -59,7 +63,41 @@ namespace EShoppingZone.Orders.API.Services
         }
 
         public async Task<bool> CancelOrderAsync(int orderId)
-            => await _repository.DeleteOrderAsync(orderId);
+        {
+            var order = await _repository.GetOrderByIdAsync(orderId);
+            if (order == null) return false;
+
+            if (order.OrderStatus == "Cancelled") return true; // Already cancelled
+
+            var success = await _repository.ChangeStatusAsync("Cancelled", orderId);
+            if (success)
+            {
+                _logger.LogInformation("AUDIT: Order {OrderId} cancelled by user/admin", orderId);
+
+                // 1. Replenish stock
+                try {
+                    await _productClient.IncrementStockAsync(order.ProductId, order.Quantity);
+                } catch (Exception ex) {
+                    _logger.LogWarning(ex, "Failed to replenish stock for cancelled Order {OrderId}", orderId);
+                }
+
+                // 2. Refund to wallet if paid online
+                if (order.ModeOfPayment == "ONLINE")
+                {
+                    try {
+                        await _walletClient.AddMoneyAsync(order.CustomerId, order.AmountPaid);
+                        _logger.LogInformation("AUDIT: Refunded {Amount} to Customer {CustomerId} for cancelled Order {OrderId}", order.AmountPaid, order.CustomerId, orderId);
+                    } catch (Exception ex) {
+                        _logger.LogError(ex, "FAILED REFUND for Order {OrderId}", orderId);
+                    }
+                }
+
+                // 3. Notify customer
+                await SendNotificationAsync(order.CustomerId, "ORDER", "Order Cancelled", $"Your order #{orderId} has been cancelled and refund initiated.");
+            }
+
+            return success;
+        }
 
         public async Task<bool> VerifyPurchaseAsync(int customerId, int productId)
         {
@@ -90,10 +128,13 @@ namespace EShoppingZone.Orders.API.Services
                 await DecrementStockAsync(order.ProductId, order.Quantity);
 
                 // Notify customer via Notify-Service
-                await SendNotificationAsync(order.CustomerId, "ORDER_PLACED");
+                await SendNotificationAsync(order.CustomerId, "ORDER", "Order Placed", $"Your order for product #{order.ProductId} has been placed successfully (COD).");
 
                 // Clear cart
                 await _cartClient.ClearCartAsync(order.CustomerId);
+
+                // Publish Event to RabbitMQ
+                await PublishOrderPlacedEvent(order);
 
 
                 await tx.CommitAsync();
@@ -115,7 +156,8 @@ namespace EShoppingZone.Orders.API.Services
             try
             {
                 // Deduct from wallet via Wallet-Service
-                await DeductWalletAsync(order.CustomerId, order.AmountPaid, order.OrderId);
+                var paySuccess = await _walletClient.PayMoneyAsync(order.CustomerId, order.AmountPaid, order.OrderId);
+                if (!paySuccess) throw new Exception("Insufficient wallet balance or wallet service error.");
 
 
                 order.ModeOfPayment = "ONLINE";
@@ -131,10 +173,13 @@ namespace EShoppingZone.Orders.API.Services
                 await DecrementStockAsync(order.ProductId, order.Quantity);
 
                 // Notify customer
-                await SendNotificationAsync(order.CustomerId, "ORDER_PLACED_ONLINE");
+                await SendNotificationAsync(order.CustomerId, "ORDER", "Order Placed Online", $"Your order for product #{order.ProductId} has been placed successfully (Paid Online).");
 
                 // Clear cart
                 await _cartClient.ClearCartAsync(order.CustomerId);
+
+                // Publish Event to RabbitMQ
+                await PublishOrderPlacedEvent(order);
 
 
                 await tx.CommitAsync();
@@ -155,11 +200,11 @@ namespace EShoppingZone.Orders.API.Services
             if (!success) throw new Exception("Failed to decrement stock via Product-Service");
         }
 
-        private async Task SendNotificationAsync(int customerId, string eventType)
+        private async Task SendNotificationAsync(int customerId, string eventType, string title, string message)
         {
             try
             {
-                await _notifyClient.SendNotificationAsync(customerId, eventType, "Order Update", $"Your order status: {eventType}");
+                await _notifyClient.SendNotificationAsync(customerId, eventType, title, message);
             }
             catch
             {
@@ -167,11 +212,65 @@ namespace EShoppingZone.Orders.API.Services
             }
         }
 
-        private async Task DeductWalletAsync(int customerId, decimal amount, int orderId = 0)
+        private async Task PublishOrderPlacedEvent(Order order)
         {
-            var success = await _walletClient.PayMoneyAsync(customerId, amount, orderId);
-            if (!success) throw new Exception("Wallet deduction failed or insufficient balance");
+            try
+            {
+                var productJson = await _productClient.GetProductByIdAsync(order.ProductId);
+                int merchantId = 0;
+                if (productJson.HasValue && productJson.Value.TryGetProperty("merchantId", out var merchantIdProp))
+                {
+                    merchantId = merchantIdProp.GetInt32();
+                }
+
+                var @event = new OrderPlacedEvent
+                {
+                    OrderId = order.OrderId,
+                    CustomerId = order.CustomerId,
+                    MerchantId = merchantId,
+                    Amount = order.AmountPaid,
+                    ProductName = order.ProductName,
+                    OrderDate = order.OrderDate,
+                    ProductId = order.ProductId,
+                    Quantity = order.Quantity
+                };
+
+                await _publishEndpoint.Publish(@event);
+                _logger.LogInformation("PUBLISHED OrderPlacedEvent for OrderId: {OrderId}", order.OrderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to publish OrderPlacedEvent for OrderId: {OrderId}", order.OrderId);
+            }
         }
 
+        public async Task<int> GetTotalOrdersCountAsync()
+        {
+            return await _context.Orders.CountAsync();
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync()
+        {
+            return await _context.Orders
+                .Where(o => o.OrderStatus != "Cancelled")
+                .SumAsync(o => o.AmountPaid);
+        }
+
+        public async Task<IEnumerable<object>> GetTopProductsAsync(int count)
+        {
+            var top = await _context.Orders
+                .GroupBy(o => new { o.ProductId, o.ProductName })
+                .Select(g => new
+                {
+                    ProductId = g.Key.ProductId,
+                    ProductName = g.Key.ProductName,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(count)
+                .ToListAsync();
+            
+            return top.Cast<object>();
+        }
     }
 }

@@ -20,8 +20,8 @@ namespace EShoppingZone.Review.API.Services
 
         public async Task<Domain.Review> SubmitReviewAsync(ReviewDto dto)
         {
-            // Verify if already reviewed
-            if (await _repository.HasCustomerReviewedAsync(dto.ProductId, dto.CustomerId))
+            // Verify if already reviewed for this specific order
+            if (await _repository.HasCustomerReviewedAsync(dto.ProductId, dto.CustomerId, dto.OrderId))
             {
                 throw new InvalidOperationException("Customer has already reviewed this product.");
             }
@@ -36,6 +36,7 @@ namespace EShoppingZone.Review.API.Services
             var review = new Domain.Review
             {
                 ProductId = dto.ProductId,
+                OrderId = dto.OrderId,
                 CustomerId = dto.CustomerId,
                 CustomerName = dto.CustomerName,
                 Rating = dto.Rating,

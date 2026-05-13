@@ -2,76 +2,51 @@ using EShoppingZone.Cart.API.Domain;
 using EShoppingZone.Cart.API.Repositories;
 using EShoppingZone.Cart.API.Services;
 using Moq;
-using FluentAssertions;
-
-// Alias to avoid Cart namespace vs Cart class ambiguity
-using CartModel = EShoppingZone.Cart.API.Domain.Cart;
+using NUnit.Framework;
 
 namespace EShoppingZone.Cart.Tests
 {
+    [TestFixture]
     public class CartServiceTests
     {
-        private readonly Mock<ICartRepository> _mockRepo;
-        private readonly CartService _service;
+        private Mock<ICartRepository> _mockRepo = null!;
+        private CartService _service = null!;
 
-        public CartServiceTests()
+        [SetUp]
+        public void Setup()
         {
             _mockRepo = new Mock<ICartRepository>();
             _service = new CartService(_mockRepo.Object);
         }
 
-        [Fact]
-        public async Task GetCartAsync_ShouldReturnNewCart_WhenCartDoesNotExist()
+        [Test]
+        public async Task GetCartAsync_ShouldCreateCartIfNoneExists()
         {
             // Arrange
-            int userId = 123;
-            _mockRepo.Setup(r => r.GetCartByUserIdAsync(userId)).ReturnsAsync((CartModel?)null);
-            _mockRepo.Setup(r => r.CreateCartAsync(It.IsAny<CartModel>()))
-                     .ReturnsAsync(new CartModel { CartId = userId, TotalPrice = 0 });
+            int userId = 1;
+            _mockRepo.Setup(r => r.GetCartByUserIdAsync(userId)).ReturnsAsync((API.Domain.Cart)null!);
+            _mockRepo.Setup(r => r.CreateCartAsync(It.IsAny<API.Domain.Cart>()))
+                .ReturnsAsync((API.Domain.Cart c) => c);
 
             // Act
             var result = await _service.GetCartAsync(userId);
 
             // Assert
-            result.Should().NotBeNull();
-            result.CartId.Should().Be(userId);
-            _mockRepo.Verify(r => r.CreateCartAsync(It.IsAny<CartModel>()), Times.Once);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.CartId, Is.EqualTo(userId));
+            _mockRepo.Verify(r => r.CreateCartAsync(It.IsAny<API.Domain.Cart>()), Times.Once);
         }
 
-        [Fact]
-        public async Task UpdateCartAsync_ShouldRecalculateTotalPrice()
+        [Test]
+        public void CartTotal_ShouldCalculateSumCorrectly()
         {
             // Arrange
-            int userId = 123;
-            var items = new List<CartItem>
+            var cart = new API.Domain.Cart
             {
-                new CartItem { ProductId = 1, Price = 50, Quantity = 2, CartId = userId },
-                new CartItem { ProductId = 2, Price = 30, Quantity = 1, CartId = userId }
-            };
-            var existingCart = new CartModel { CartId = userId, TotalPrice = 0, Items = new List<CartItem>() };
-
-            _mockRepo.Setup(r => r.GetCartByUserIdAsync(userId)).ReturnsAsync(existingCart);
-            _mockRepo.Setup(r => r.UpdateCartAsync(It.IsAny<CartModel>()))
-                     .ReturnsAsync((CartModel c) => c);
-
-            // Act
-            var result = await _service.UpdateCartAsync(userId, items);
-
-            // Assert
-            result.TotalPrice.Should().Be(130m); // 50*2 + 30*1
-        }
-
-        [Fact]
-        public void CartTotal_ShouldSumItemPrices()
-        {
-            // Arrange
-            var cart = new CartModel
-            {
-                CartId = 1,
                 Items = new List<CartItem>
                 {
-                    new CartItem { Price = 10, Quantity = 3 },
-                    new CartItem { Price = 25, Quantity = 2 }
+                    new CartItem { Price = 100, Quantity = 2 },
+                    new CartItem { Price = 50, Quantity = 1 }
                 }
             };
 
@@ -79,7 +54,28 @@ namespace EShoppingZone.Cart.Tests
             var total = _service.CartTotal(cart);
 
             // Assert
-            total.Should().Be(80m); // 10*3 + 25*2
+            Assert.That(total, Is.EqualTo(250));
+        }
+
+        [Test]
+        public async Task MoveToCartAsync_ValidItem_ShouldAddAndRemoveFromWishlist()
+        {
+            // Arrange
+            int wishlistId = 10;
+            var wishlist = new Wishlist { UserId = 1, ProductId = 100, Price = 500, ProductName = "Test Product" };
+            var cart = new API.Domain.Cart { CartId = 1, Items = new List<CartItem>() };
+
+            _mockRepo.Setup(r => r.GetWishlistItemAsync(wishlistId)).ReturnsAsync(wishlist);
+            _mockRepo.Setup(r => r.GetCartByUserIdAsync(1)).ReturnsAsync(cart);
+
+            // Act
+            var result = await _service.MoveToCartAsync(wishlistId);
+
+            // Assert
+            Assert.That(result.Items.Count, Is.EqualTo(1));
+            Assert.That(result.Items[0].ProductId, Is.EqualTo(100));
+            Assert.That(result.TotalPrice, Is.EqualTo(500));
+            _mockRepo.Verify(r => r.RemoveFromWishlistAsync(wishlistId), Times.Once);
         }
     }
 }

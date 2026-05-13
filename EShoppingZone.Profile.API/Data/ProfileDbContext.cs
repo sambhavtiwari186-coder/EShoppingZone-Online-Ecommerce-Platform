@@ -12,11 +12,16 @@ namespace EShoppingZone.Profile.API.Data
 
         public DbSet<UserProfile> Profiles { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<DeliveryAgent> DeliveryAgents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserProfile>()
                 .HasKey(p => p.ProfileId);
+
+            modelBuilder.Entity<UserProfile>()
+                .Property(p => p.IsSuspended)
+                .HasDefaultValue(false);
 
             modelBuilder.Entity<Address>()
                 .HasOne(a => a.Profile)

@@ -81,8 +81,17 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=data/notify.db
+      - RabbitMQ__Host=rabbitmq
     volumes:
       - notify-data:/app/data
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 volumes:
   profile-data:

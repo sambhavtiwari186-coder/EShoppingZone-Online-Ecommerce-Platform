@@ -3,6 +3,7 @@ namespace EShoppingZone.Orders.API.HttpClients
     public interface IWalletClient
     {
         Task<bool> PayMoneyAsync(int customerId, decimal amount, int orderId);
+        Task<bool> AddMoneyAsync(int customerId, decimal amount);
     }
 
     public class WalletClient : IWalletClient
@@ -17,6 +18,12 @@ namespace EShoppingZone.Orders.API.HttpClients
         public async Task<bool> PayMoneyAsync(int customerId, decimal amount, int orderId)
         {
             var response = await _httpClient.PostAsync($"/api/wallet/payMoney/{customerId}/{amount}/{orderId}", null);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> AddMoneyAsync(int customerId, decimal amount)
+        {
+            var response = await _httpClient.PostAsync($"/api/wallet/addMoney/{customerId}/{amount}", null);
             return response.IsSuccessStatusCode;
         }
     }

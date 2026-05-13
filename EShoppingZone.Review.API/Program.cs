@@ -25,6 +25,13 @@ builder.Host.UseSerilog((context, loggerConfiguration) => {
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", policy => policy
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 // Configure SQLite
 builder.Services.AddDbContext<ReviewDbContext>(opt => 
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=reviews.db"));
@@ -123,6 +130,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

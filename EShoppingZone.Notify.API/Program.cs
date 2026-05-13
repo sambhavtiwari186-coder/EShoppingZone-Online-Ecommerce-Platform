@@ -7,8 +7,32 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
+using MassTransit;
+using EShoppingZone.Notify.API.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    // Add Consumer
+    x.AddConsumer<OrderPlacedConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"] ?? "localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        // Configure Receive Endpoints
+        cfg.ReceiveEndpoint("order-placed-queue", e =>
+        {
+            e.ConfigureConsumer<OrderPlacedConsumer>(context);
+        });
+    });
+});
 
 // Configure Serilog
 builder.Host.UseSerilog((context, loggerConfiguration) => {
@@ -21,6 +45,13 @@ builder.Host.UseSerilog((context, loggerConfiguration) => {
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", policy => policy
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -84,6 +115,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

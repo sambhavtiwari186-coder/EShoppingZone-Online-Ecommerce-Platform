@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShoppingZone.Product.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/products")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace EShoppingZone.Product.API.Controllers
             _service = service;
         }
 
-        [HttpGet("all")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Domain.Product>>> GetAllProducts()
         {
             var products = await _service.GetAllProductsAsync();
@@ -52,6 +52,21 @@ namespace EShoppingZone.Product.API.Controllers
             return Ok(products);
         }
 
+        [HttpGet("byMerchant/{id}")]
+        public async Task<ActionResult<IEnumerable<Domain.Product>>> GetProductsByMerchant(int id)
+        {
+            var products = await _service.GetProductsByMerchantIdAsync(id);
+            return Ok(products);
+        }
+
+        [HttpGet("stockMovements/{merchantId}")]
+        [Authorize(Roles = "MERCHANT")]
+        public async Task<ActionResult<IEnumerable<StockMovement>>> GetStockMovementsByMerchant(int merchantId)
+        {
+            var movements = await _service.GetStockMovementsByMerchantAsync(merchantId);
+            return Ok(movements);
+        }
+
         [HttpPost("add")]
         [Authorize(Roles = "MERCHANT")]
         public async Task<ActionResult<Domain.Product>> AddProduct(Domain.Product product)
@@ -70,13 +85,19 @@ namespace EShoppingZone.Product.API.Controllers
         }
 
         [HttpPut("decrementStock/{id}/{qty}")]
-        // "Internal" might mean no auth from within the network or a specific service account. 
-        // For now, I'll leave it open or add a placeholder.
         public async Task<IActionResult> DecrementStock(int id, int qty)
         {
             var result = await _service.DecrementStockAsync(id, qty);
             if (!result) return NotFound();
             return Ok(new { Message = "Stock decremented successfully" });
+        }
+
+        [HttpPut("incrementStock/{id}/{qty}")]
+        public async Task<IActionResult> IncrementStock(int id, int qty)
+        {
+            var result = await _service.IncrementStockAsync(id, qty);
+            if (!result) return NotFound();
+            return Ok(new { Message = "Stock incremented successfully" });
         }
 
         [HttpDelete("{id}")]

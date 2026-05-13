@@ -25,6 +25,13 @@ builder.Host.UseSerilog((context, loggerConfiguration) => {
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", policy => policy
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 // Configure SQLite
 builder.Services.AddDbContext<WalletDbContext>(opt => 
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=wallet.db"));
@@ -106,6 +113,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<WalletDbContext>();
         context.Database.Migrate();
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
@@ -122,6 +130,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

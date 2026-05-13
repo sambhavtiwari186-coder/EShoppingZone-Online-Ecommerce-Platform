@@ -9,6 +9,7 @@ namespace EShoppingZone.Product.API.Data
         public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options) { }
 
         public DbSet<Domain.Product> Products { get; set; }
+        public DbSet<StockMovement> StockMovements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +39,8 @@ namespace EShoppingZone.Product.API.Data
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, (JsonSerializerOptions?)null)
                 );
+
+            // Seeding is handled by DbInitializer.Initialize() at startup
         }
     }
 }

@@ -15,17 +15,17 @@ namespace EShoppingZone.Orders.API.Repositories
 
         public async Task<IEnumerable<Order>> GetAllOrdersAsync()
         {
-            return await _context.Orders.ToListAsync();
+            return await _context.Orders.Include(o => o.Address).ToListAsync();
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByCustomerAsync(int customerId)
         {
-            return await _context.Orders.Where(o => o.CustomerId == customerId).ToListAsync();
+            return await _context.Orders.Include(o => o.Address).Where(o => o.CustomerId == customerId).ToListAsync();
         }
 
         public async Task<Order?> GetOrderByIdAsync(int orderId)
         {
-            return await _context.Orders.FindAsync(orderId);
+            return await _context.Orders.Include(o => o.Address).FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
 
         public async Task<Order> CreateOrderAsync(Order order)

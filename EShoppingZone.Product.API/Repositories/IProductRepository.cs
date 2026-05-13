@@ -13,5 +13,12 @@ namespace EShoppingZone.Product.API.Repositories
         Task<Domain.Product?> UpdateProductAsync(Domain.Product product);
         Task<bool> DeleteProductAsync(int id);
         Task<int> DecrementStockAsync(int productId, int qty);
+        Task<int> IncrementStockAsync(int productId, int qty);
+        Task<IEnumerable<string>> GetAllCategoriesAsync();
+        Task<IEnumerable<Domain.Product>> GetProductsByMerchantIdAsync(int merchantId);
+        
+        // Stock Movement methods
+        Task AddStockMovementAsync(StockMovement movement);
+        Task<IEnumerable<StockMovement>> GetStockMovementsByMerchantIdAsync(int merchantId);
     }
 }

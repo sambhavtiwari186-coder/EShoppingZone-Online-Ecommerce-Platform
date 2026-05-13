@@ -62,9 +62,35 @@ namespace EShoppingZone.Wallet.API.Services
             await _repository.SaveChangesAsync();
 
             // Notify customer
-            await _notifyClient.SendNotificationAsync(walletId, "WALLET_CREDITED", "Wallet Credited", $"Your wallet has been credited with {amount}");
+            await _notifyClient.SendNotificationAsync(walletId, "WALLET", "Wallet Credited", $"Your wallet has been credited with {amount}");
         }
 
+
+        public async Task WithdrawMoneyAsync(int walletId, decimal amount)
+        {
+            var wallet = await _repository.GetWalletByIdAsync(walletId);
+            if (wallet == null) throw new KeyNotFoundException("Wallet not found");
+
+            if (wallet.CurrentBalance < amount)
+                throw new InvalidOperationException("Insufficient balance for withdrawal");
+
+            wallet.CurrentBalance -= amount;
+            wallet.Statements.Add(new Statement
+            {
+                TransactionType = "DEBIT",
+                Amount = amount,
+                DateTime = DateTime.UtcNow,
+                TransactionRemarks = "Money withdrawn from wallet"
+            });
+
+            _logger.LogInformation("AUDIT: Wallet {WalletId} debited with {Amount} (Withdrawal)", walletId, amount);
+
+            await _repository.UpdateWalletAsync(wallet);
+            await _repository.SaveChangesAsync();
+
+            // Notify customer
+            await _notifyClient.SendNotificationAsync(walletId, "WALLET", "Wallet Withdrawal", $"Your wallet has been debited with {amount} due to withdrawal.");
+        }
 
         public async Task<EWallet> PayMoneyAsync(int walletId, decimal amount, int orderId)
         {
@@ -94,7 +120,7 @@ namespace EShoppingZone.Wallet.API.Services
                 await tx.CommitAsync();
 
                 // Notify customer
-                await _notifyClient.SendNotificationAsync(walletId, "WALLET_DEBITED", "Wallet Debited", $"Your wallet has been debited with {amount} for order {orderId}");
+                await _notifyClient.SendNotificationAsync(walletId, "WALLET", "Wallet Debited", $"Your wallet has been debited with {amount} for order {orderId}");
 
                 return wallet;
             }

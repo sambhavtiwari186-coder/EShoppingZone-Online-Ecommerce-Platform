@@ -30,11 +30,30 @@ namespace EShoppingZone.Profile.API.Controllers
             var user = await _profileService.FindByEmailIdAsync(request.EmailId);
             if (user == null || !_profileService.VerifyPassword(user, request.Password))
             {
-                return Unauthorized(new { Message = "Invalid email or password. Please make sure you have registered first using /api/Profiles/addCustomer." });
+                return Unauthorized(new { Message = "Invalid email or password." });
+            }
+
+            if (user.IsSuspended)
+            {
+                return Unauthorized(new { Message = "Your account has been suspended. Please contact support." });
             }
 
             var token = GenerateJwtToken(user);
             return Ok(new { Token = token });
+        }
+
+        [HttpPost("register/customer")]
+        public async Task<IActionResult> RegisterCustomer([FromBody] UserProfile profile)
+        {
+            await _profileService.AddCustomerAsync(profile);
+            return Ok(profile);
+        }
+
+        [HttpPost("register/merchant")]
+        public async Task<IActionResult> RegisterMerchant([FromBody] UserProfile profile)
+        {
+            await _profileService.AddMerchantAsync(profile);
+            return Ok(profile);
         }
 
         [HttpGet("github-login")]

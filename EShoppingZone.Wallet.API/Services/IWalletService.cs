@@ -9,6 +9,7 @@ namespace EShoppingZone.Wallet.API.Services
         Task<IEnumerable<Statement>> GetStatementsByWalletIdAsync(int walletId);
         Task<EWallet> AddWalletAsync(EWallet wallet);
         Task AddMoneyAsync(int walletId, decimal amount);
+        Task WithdrawMoneyAsync(int walletId, decimal amount);
         Task<EWallet> PayMoneyAsync(int walletId, decimal amount, int orderId);
         Task DeleteWalletAsync(int walletId);
     }
