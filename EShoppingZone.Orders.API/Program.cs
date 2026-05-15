@@ -40,7 +40,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowFrontend", policy => policy
-        .WithOrigins("http://localhost:4200")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -52,28 +52,28 @@ builder.Services.AddDbContext<OrderDbContext>(opt =>
 // Configure Typed HttpClients for inter-service calls with Polly
 builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:ProductAPI"] ?? "http://localhost:5002");
+    client.BaseAddress = new Uri(builder.Configuration["Services:ProductAPI"] ?? "http://product-api:8080");
 })
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
 builder.Services.AddHttpClient<INotifyClient, NotifyClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://localhost:5007");
+    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://notify-api:8080");
 })
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
 builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:WalletAPI"] ?? "http://localhost:5005");
+    client.BaseAddress = new Uri(builder.Configuration["Services:WalletAPI"] ?? "http://wallet-api:8080");
 })
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
 builder.Services.AddHttpClient<ICartClient, CartClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:CartAPI"] ?? "http://localhost:5003");
+    client.BaseAddress = new Uri(builder.Configuration["Services:CartAPI"] ?? "http://cart-api:8080");
 })
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());

@@ -27,7 +27,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowFrontend", policy => policy
-        .WithOrigins("http://localhost:4200")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -39,7 +39,7 @@ builder.Services.AddDbContext<ReviewDbContext>(opt =>
 // Configure Typed HttpClient for inter-service calls (OrderService) with Polly
 builder.Services.AddHttpClient<IOrderClient, OrderClient>(client =>
 {
-    var baseAddress = builder.Configuration["Services:OrderAPI"] ?? "http://localhost:5004";
+    var baseAddress = builder.Configuration["Services:OrderAPI"] ?? "http://order-api:8080";
     client.BaseAddress = new Uri(baseAddress);
 })
 .AddPolicyHandler(GetRetryPolicy())

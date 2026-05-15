@@ -51,7 +51,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowFrontend", policy => policy
-        .WithOrigins("http://localhost:4200")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -63,7 +63,7 @@ builder.Services.AddDbContext<ProductDbContext>(opt =>
 // Configure Typed HttpClient for inter-service calls with Polly
 builder.Services.AddHttpClient<INotifyClient, NotifyClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://localhost:5007");
+    client.BaseAddress = new Uri(builder.Configuration["Services:NotifyAPI"] ?? "http://notify-api:8080");
 })
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());
